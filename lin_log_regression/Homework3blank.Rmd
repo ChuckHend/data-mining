@@ -1,0 +1,391 @@
+---
+title: "Homework 3 R markdown"
+author: "Adam Hendel"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    fig_height: 4
+    fig_width: 4.5
+  pdf_document:
+    fig_height: 4
+    fig_width: 4.5
+  word_document:
+    fig_height: 4
+    fig_width: 4.5
+---
+
+
+```{r, setup, include=FALSE}
+require(mosaic)   # Load additional packages here 
+require(dplyr)
+# Some customization.  You can alter or delete as desired (if you know what you are doing).
+trellis.par.set(theme=theme.mosaic()) # change default color scheme for lattice
+knitr::opts_chunk$set(
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+```
+
+#### <span style="color:Blue">**Intellectual Property:**</span>  
+These problems are the intellectual property of the instructors and may not be reproduced outside of this course.
+
+#### <span style="color:Crimson">**Due Date:**</span>  
+Tuesday, Sep 26, 2017 at 11:59 PM 
+
+***  
+
+#####################################################
+## <span style="color:DarkViolet">Problem 1:  Linear Regression  </span>
+#####################################################
+
+<span style="color:DarkViolet">In this problem, you will use multiple linear regression to model the incomes of people from Wisconsin.</span>
+
+<span style="color:DarkViolet">Data file (on D2L): *Wisconsin_income.csv*  </span>
+
+<span style="color:DarkViolet">Data dictionary (on D2L): *Wisconsin_income data dictionary.txt*</span>
+
+<span style="color:DarkViolet">Public Use Microdata from American Community Survey.  Accessed from http://www2.census.gov/programs-surveys/acs/data/pums/2014/1-Year/ on 27 July 2016.</span>
+ 
+<span style="color:DarkViolet"></span>
+
+
+### <span style="color:DarkViolet">Question 1</span> **<span style="color:Crimson">(2 points)</span>**
+<span style="color:DarkViolet">Read in the data Wisconsin_income.csv.  Open the data dictionary in a text editor.  
+
+<span style="color:DarkViolet">Notice that the following 9 variables are categorical, but are coded as numbers:  </span>  
+
+* Citizenship  
+* Class of worker  
+* Language spoken at home  
+* Marital status  
+* Sex  
+* Disability  
+* Race  
+* Hispanic  
+
+<span style="color:DarkViolet">Tell R to treat them as factors.  Enter your R code below.</span>
+
+
+<span style="color:green">**Code Answer**: </span>
+```{r, echo=TRUE}
+#wisc <- read.csv('/Users/ahendel1/Documents/Academics/data-mining/lin_log_regression/Wisconsin_income.csv')
+#wisc <- read.csv('/mnt/ubudata/projects/data-mining/lin_log_regression/Wisconsin_income.csv')
+wisc <- read.csv('T:/OneDrive/Academics/Data Science/DS740_Data_Mining/lin_log_regression/Wisconsin_income.csv')
+
+# note: there are only 8 variables listed above (not 9)
+vars <- c('CIT2', 'COW', 'LANX', 'MAR', 'SEX', 'DIS', 'RAC', 'Hispanic')
+wisc[vars] <- lapply(wisc[vars], factor)
+str(wisc[vars])
+```
+
+### <span style="color:DarkViolet">Question 2</span> **<span style="color:Crimson">(2 points)</span>**
+<span style="color:DarkViolet">Make histograms of people’s total earnings, usual hours worked per week, and travel time to work.  Which of these 3 variables are likely to benefit from log-transformation?  Apply the transformation if appropriate, and enter your R code below.</span>
+
+
+<span style="color:green">**Code Answer**: </span>
+```{r, echo=TRUE}
+par(mfrow=c(1,3))
+hist(wisc$PERNP); hist(wisc$WKHP); hist(wisc$JWMNP)
+
+wisc$log.PERNP <- wisc$PERNP %>% log()
+wisc$log.JWMNP <- wisc$JWMNP %>% log()
+hist(wisc$log.PERNP); hist(wisc$WKHP); hist(wisc$log.JWMNP)
+```
+
+### <span style="color:DarkViolet">Question 3</span> **<span style="color:Crimson">(2 points)</span>**
+<span style="color:DarkViolet">Use *regsubsets()* to perform best subset selection for a linear model for total earnings as a function of all other variables in the data set.  
+If you log-transformed any variables in the previous question, use the **transformed** variables, <span style="color:red"> *not* </span> the original variables, here.  Consider models with up to 41 variables.  Make a plot summarizing which variables are included in the best model of each size.  Enter your R code below.</span>
+
+
+<span style="color:green">**Code Answer**: </span>
+```{r, echo=TRUE}
+require(leaps)
+# drop non-log transformed variables from the data set
+vars <- names(wisc)[! names(wisc) %in% c('PERNP', 'JWMNP')]
+wisc.log <- wisc[,vars]
+# fit the model
+regfit.full = regsubsets(log.PERNP~., data=wisc.log, nvmax=41)
+# visualize the variables in each model
+plot(regfit.full, scale="adjr2",main="")
+```
+
+***
+
+### <span style="color:DarkViolet">Question 4</span> **<span style="color:Crimson">(3 points)</span>**
+<span style="color:DarkViolet">Plot adjusted $R^2$ as a function of number of variables.  Find the number of variables in the best model, as measured by adjusted $R^2$.  Enter your R code below.</span>
+
+<span style="color:green">**Code Answer**: </span>
+```{r, echo=TRUE}
+regfit.summary <- summary(regfit.full)
+plot(regfit.summary$adjr2, xlab='# of variables', ylab='R^2')
+
+# determine the model which has the maximum adj. r-squred value
+which.max(regfit.summary$adjr2)
+
+```
+
+### <span style="color:DarkViolet">Question 5</span> **<span style="color:Crimson">(1 points)</span>**
+<span style="color:DarkViolet">How many variables (not counting the intercept) are in the best model, as measured by adjusted $R^2$?</span>
+
+```{r}
+coef(regfit.full, which.max(regfit.summary$adjr2))
+# 37 variables including intercept (36 without it)
+```
+
+<span style="color:green">**Numeric Answer**  </span> **<span style="color:red">(AUTOGRADED on D2L)</span>**: 
+
+### <span style="color:DarkViolet">Question 6</span> **<span style="color:Crimson">(1 points)</span>**
+<span style="color:DarkViolet">How many variables (not counting the intercept) are in the best model, as measured by BIC?</span>
+
+```{r}
+which.min(regfit.summary$bic)
+coef(regfit.full, which.min(regfit.summary$bic))
+
+```
+
+<span style="color:green">**Numeric Answer**  </span> **<span style="color:red">(AUTOGRADED on D2L)</span>**: 
+
+***
+
+### <span style="color:DarkViolet">Question 7</span> **<span style="color:Crimson">(4 points)</span>**
+<span style="color:DarkViolet">Set the random seed equal to 3.  Perform 10-fold cross-validation to choose the best size of model (from 1 to 41 variables) based on cross-validation MSE.  Record the mean squared error within each fold for each size of variable.  **Note**: This step will probably take a few minutes to run!  
+Enter your R code below.</span>
+
+<span style="color:green">**Code Answer**: </span>
+```{r, echo=TRUE}
+# function to be used with regsubsets
+predict.regsub <- function(object, newdata, id, ...){
+  form <- as.formula(object$call[[2]])
+  mat  <- model.matrix(form, newdata)
+  coefi<- coef(object, id=id)
+  xvars<- names(coefi)
+  mat[ , xvars] %*% coefi
+}
+
+n <- nrow(wisc.log) # num observations in data
+k <- 10 # 10-fold CV
+groups <- c(rep(1:k,floor(n/k)),1:(n-floor(n/k)*k))
+set.seed(3)
+cvgroups <- sample(groups,n)
+nvmax <- 41
+# empty df to record results, with number of rows equal to the number 
+# of variables we want to allow into a model
+group.error <- matrix(NA, nr=nvmax, nc=k)
+
+for(i in 1:k){
+  groupi <- (cvgroups == i)
+  # perform regsubsets on training dataset
+  cv.fit <- regsubsets(log.PERNP~., data=wisc.log[!groupi,], nvmax=nvmax)
+  for(j in 1:nvmax){
+    # iterate for each model size (using our predict function for regsubsets)
+    y.pred <- predict.regsub(cv.fit, newdata=wisc.log[groupi,], id=j)
+    # record the results
+    group.error[j, i] <- mean((wisc.log$log.PERNP[groupi] - y.pred)^2)
+  }
+}
+
+```
+
+### <span style="color:DarkViolet">Question 8</span> **<span style="color:Crimson">(1 points)</span>**
+<span style="color:DarkViolet">Find the mean of the MSEs from all the folds with the same number of variables.  Which number of variables gives the lowest cross-validation MSE?</span>
+
+```{r}
+# Question 8
+# calc the mean on each row (each value from nvmax)
+MSE <- apply(group.error, 1, mean)
+plot(MSE)
+minSE.mod <- which.min(MSE); minSE.mod
+# 39
+
+```
+<span style="color:green">**Numeric Answer**  </span> **<span style="color:red">(AUTOGRADED on D2L)</span>**: 
+
+### <span style="color:DarkViolet">Question 9</span> **<span style="color:Crimson">(2 points)</span>**
+<span style="color:DarkViolet">Estimate the standard error of the cross-validation errors and find the most parsimonious model with a CV error within 1 standard error of the lowest.  
+Enter your R code below.</span>
+
+<span style="color:green">**Code Answer**: </span>
+```{r, echo=TRUE}
+# calculate the SE for each model
+se <- apply(group.error, 1, sd) / sqrt(k)
+# find all models that meet the 'one SE rule'
+# (all models less than or equal to the best model, plus one SE)
+thresh <- which(MSE <= MSE[minSE.mod] + se[minSE.mod]); min(thresh)
+
+```
+
+***
+
+### <span style="color:DarkViolet">Question 10</span> **<span style="color:Crimson">(1 points)</span>**
+<span style="color:DarkViolet">How many variables (not counting the intercept) are in the most parsimonious model with a CV error within 1 standard error of the lowest?</span>
+
+```{r}
+min(thresh)
+```
+
+<span style="color:green">**Numeric Answer**  </span> **<span style="color:red">(AUTOGRADED on D2L)</span>**: 
+
+### <span style="color:DarkViolet">Question 11</span> **<span style="color:Crimson">(4 points)</span>**
+<span style="color:DarkViolet">Use $\texttt{regsubsets}$ to find the best model for the whole data set which has the number of variables you found in the previous question.  Write 4-6 sentences interpreting the signs of the coefficients.  Include possible explanations for the associations.  **Note**: It may be helpful to refer to the data dictionary and/or a map of Wisconsin, such as https://en.wikipedia.org/wiki/Wisconsin#/media/File:Wisconsin-counties-map.gif.  Refer to variables in plain English. </span>
+
+<span style="color:green">**Text Answer**: </span>
+```{r}
+coef(regfit.full, min(thresh))
+```
+```
+The best model (6 variables + intercept) is as shown below. I will address each coefficient individually.
+y-hat = 7.98 - 0.56*COW6 - 0.25*MAR5 - 0.27*SEX2 +0.03*WKHP + 0.09*Education + 0.08*log.JWMNP
+
+- COW6: "Class of Worker:Self-employed in own not incorporated business, professional practice, or farm"
+- MAR5: "Maritial status: never married or under 15 years old".
+- SEX2: "female"
++ WKHP: "usual hours worked per week"
++ Education: "years of education not counting kintergarten"
++ JWMNP: (log) "travel time to work"
+
+Negative signs on these coefficients indicate that the presence of the variable is associated with lower personal earnings. Conversely, a positive sign is associated with higher personal earnings. Thus, being self employed excluding certain fields,  not married or under 15 years old, a female are associated with lower total earnings. Working longer hours, more education, and longer travel time to work are associated with higher total earnings.
+
+Inequality and discrimination is likely an explanation for the coefficient of the female variable. Lower earnings for self-employment in these excluded fields could be attributed to the raw scale of small business. Many humans under the age of 15 do not work, so lower earnings for these individuals does make sense.
+
+Working more hours, especially for hourly compensated individuals, logically leads to higher earnings. Additionally, many of the jobs in the word that require higher levels of education do pay better. Regarding travel time for work-perhaps individuals only subject themselves to long travel times if the level of compensation overcomes travel time. 
+
+```
+***
+
+
+
+#####################################################
+## <span style="color:DarkViolet">Problem 2:  Logistic Regression  </span>
+#####################################################
+
+<span style="color:DarkViolet">In this problem, you will use logistic regression to predict whether a car has low or high gas mileage.</span>
+
+### <span style="color:DarkViolet">Question 12</span> **<span style="color:Crimson">(2 points)</span>**
+<span style="color:DarkViolet">Write R code to:  </span>
+
+* Load the **Auto** data set into R.  The data set is in the ISLR library.  
+* Create a binary variable that equals 1 for cars with gas mileage above the median and a 0 for cars with gas mileage below the median.  Tell R to treat it as a factor.  
+* Tell R to treat the origin variable as a factor.  
+
+<span style="color:DarkViolet">Enter your R code below.</span>
+
+<span style="color:green">**Code Answer**: </span>
+```{r, echo=TRUE}
+require(ISLR)
+require(dplyr)
+
+# values greater than the median become "1"
+Auto$bin.mpg <- ifelse(Auto$mpg > median(Auto$mpg), 1, 0) %>% as.factor()
+# treat the original variable (Auto$mpg) as a factor
+Auto$origin <- as.factor(Auto$origin)
+```
+
+### <span style="color:DarkViolet">Question 13</span> **<span style="color:Crimson">(2 points)</span>**
+<span style="color:DarkViolet">Make a matrix of scatterplots of the variables in **Auto**.  Do you have any concerns about collinearity?  If so, for which variables?  Explain.</span>
+
+<span style="color:green">**Text Answer**: </span>
+```{r}
+pairs(Auto)
+```
+
+***
+
+### <span style="color:DarkViolet">Question 14</span> **<span style="color:Crimson">(2 points)</span>**
+<span style="color:DarkViolet">Perform logistic regression of mpg.bin on the other variables in **Auto** (excluding mpg and name).  Enter your R code below.</span>
+
+<span style="color:green">**Code Answer**: </span>
+```{r, echo=TRUE}
+# get list of variables in Auto, excluding mpg and name
+vars <- names(Auto)[!names(Auto) %in% c('mpg', 'name')]
+# fit the model
+mod <- glm(bin.mpg ~ ., data = Auto[,vars], family = "binomial")
+summary(mod)
+
+```
+
+
+### <span style="color:DarkViolet">Question 15</span> **<span style="color:Crimson">(1 points)</span>**
+<span style="color:DarkViolet">Compute the variance inflation factor for each of the predictor variables in the model.  Which variable(s) have VIFs greater than or equal to 10?</span>
+
+<span style="color:green">**Multiple SELECT Answer** </span>
+**<span style="color:red">(AUTOGRADED on D2L)</span>**: 
+
+```{r}
+library(car)
+vif(mod)
+```
+cylinders,  
+
+	
+displacement,  
+
+	
+horsepower, and/or
+
+	
+weight
+
+### <span style="color:DarkViolet">Question 16</span> **<span style="color:Crimson">(4 points)</span>**
+<span style="color:DarkViolet">Remove any variables with VIFs greater than or equal to 10.  Set the random seed equal to 3 and perform 10-fold cross-validation.  In each phase of the cross-validation, fit the logistic model (excluding name, continuous mpg, and the variable(s) you found in the previous question and predict the probability of high gas mileage for each data point in the validation set.  Store all of the probabilities in a single vector.  
+**Note**:  Depending on how you set up the formula in the logistic regression, the predict function may give an error, “Factor name has new levels.”  This is complaining about the fact that there are models of car in the validation set that weren’t included in the training data.  But, it’s not really a problem, because we’re not using name as a predictor variable.  You can create a new data frame that excludes name, or you can update the levels of the name factor in the logistic model, as shown here: http://stackoverflow.com/questions/22315394/factor-has-new-levels-error-for-variable-im-not-using  
+Enter your R code below.</span>
+
+<span style="color:green">**Code Answer**: </span>
+```{r, echo=TRUE}
+# exclude mpg and name from our data set
+# also exclude displacement, which has VIF > 10
+vars <- names(Auto)[!names(Auto) %in% c('mpg', 'name', 'displacement')]
+auto.df <- Auto[,vars]
+
+n <- nrow(auto.df) # num observations in data
+k <- 10 # 10-fold CV
+groups <- c(rep(1:k,floor(n/k)),1:(n-floor(n/k)*k))
+set.seed(3)
+cvgroups <- sample(groups,n)
+
+# empty vector to record the probabilities from each fold
+probs <- rep(NA,n)
+
+for(i in 1:k){
+  groupi <- (cvgroups == i)
+  # perform regsubsets on training dataset
+  cv.fit <- glm(bin.mpg ~ ., data = auto.df[!groupi,], family = "binomial")
+  # record predicted probabilities 
+  probs[groupi] <- predict(cv.fit, newdata = auto.df[groupi,], type='response')
+
+}
+
+```
+
+
+***
+
+### <span style="color:DarkViolet">Question 17</span> **<span style="color:Crimson">(2 points)</span>**
+<span style="color:DarkViolet">Create a ROC curve for this model.  What is its AUC?</span>
+
+<span style="color:green">**Numeric Answer**  </span> **<span style="color:red">(AUTOGRADED on D2L)</span>**:  
+
+```{r}
+#Question 17
+require(pROC)
+myroc <- roc(response=auto.df$bin.mpg, predictor = probs)
+plot(myroc); myroc$auc
+
+jpeg('week3_roc.jpg')
+plot.roc(my_roc)
+dev.off()
+```
+
+
+### <span style="color:DarkViolet">Question 18</span> **<span style="color:Crimson">(3 points)</span>**
+<span style="color:DarkViolet">Upload an image of your ROC curve to *Homework 3: ROC Curve* (discussion board on D2L).  As part of your discussion post, write 1-2 sentences assessing the model based on the ROC curve and AUC.</span>
+
+<span style="color:green">**Text Answer**: </span>
+
+<span style="color:green">**Graph Answer**  </span>: 
+```{r}
+# Question 18
+
+```
+
+
+

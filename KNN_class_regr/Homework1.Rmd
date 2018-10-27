@@ -1,0 +1,326 @@
+---
+title: "Homework 1 R markdown"
+author: "Adam Hendel"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    fig_height: 4
+    fig_width: 4.5
+  pdf_document:
+    fig_height: 4
+    fig_width: 4.5
+  word_document:
+    fig_height: 4
+    fig_width: 4.5
+---
+
+```{r, setup, include=FALSE}
+require(mosaic)   # Load additional packages here 
+
+# Some customization.  You can alter or delete as desired (if you know what you are doing).
+trellis.par.set(theme=theme.mosaic()) # change default color scheme for lattice
+knitr::opts_chunk$set(
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+```
+
+#### <span style="color:Blue">**Intellectual Property:**</span>  
+These problems are the intellectual property of the instructors and may not be reproduced outside of this course.
+
+#### <span style="color:Crimson">**Due Date:**</span>  
+Tuesday, Sep 12, 2017 at 11:59 PM 
+
+***  
+
+##########################################################################
+## <span style="color:DarkViolet">Problem 1: Analyzing Gas Mileage  </span>
+##########################################################################
+
+<span style="color:DarkViolet">You are about to start Problem 1 of 2, which analyzes gas mileage and uses the ISLR library in R.   You can find more information in Homework 1: Instructions on D2L. </span>
+
+***  
+
+#####################################
+#### Question 1: **<span style="color:Crimson">(2 points)</span>**
+#####################################
+Load the **ISLR** library into R and look at the first few rows of the **Auto** data set.  
+```{r echo=FALSE}
+require(ISLR)
+head(Auto)
+
+```
+
+What data mining strategy would you use to investigate the following questions?  [Note that the orderings for the answer choices on D2L might differ from those shown below.]
+
+*   You are building an app for a used-car website that will take information about the year, engine displacement, and weight of cars, and determine whether they are most likely American (origin = 1), European (2), or Japanese (3).  
+<span style="color:green">**Multiple Choice Answer** </span>
+**<span style="color:red">(AUTOGRADED on D2L)</span>**:  one of *Regression*, *Classification*, or *Unsupervised learning*
+
+*   The manager of a used-car lot wants to arrange groups of similar cars on the lot.  The manager wants to understand the relationships between the year, engine displacement, and weight of cars to identify informative groupings.  
+<span style="color:green">**Multiple Choice Answer** </span>
+**<span style="color:red">(AUTOGRADED on D2L)</span>**:  one of *Regression*, *Classification*, or *Unsupervised learning*
+
+*   You are building an app for a used-car website that will take information about the year, engine displacement, and weight of cars, and estimate their horsepower.  
+<span style="color:green">**Multiple Choice Answer** </span>
+**<span style="color:red">(AUTOGRADED on D2L)</span>**:  one of *Regression*, *Classification*, or *Unsupervised learning*
+
+
+***  
+
+#####################################
+#### Question 2: **<span style="color:Crimson">(3 points)</span>**
+#####################################
+We would like to use K-nearest neighbors to predict the gas mileage (MPG) of cars based on their weight (in pounds) and their year of manufacture.  Explain why standardizing the data is a good idea. *Comment on observed features of the data and possible consequences.*  
+
+<span style="color:green">**Text Answer**: </span>
+ 
+
+#####################################
+#### Question 3: **<span style="color:Crimson">(1 point)</span>**
+#####################################
+Create two new variables, **weight.std** and **year.std**, containing standardized values of the weight and year.  
+
+Enter your R code below.  
+<span style="color:green">**Code Answer**: </span>
+```{r}
+weight.std <- scale(Auto$weight)
+year.std   <- scale(Auto$year)
+```
+
+
+#####################################
+#### Question 4: **<span style="color:Crimson">(2 points)</span>**
+#####################################
+Create a data frame or matrix containing your new variables, **weight.std** and **year.std**. Use **write.csv()** to save the data frame or matrix to a file.  We'll use these variables again in Homework 2.  
+
+Enter your R code below.  
+<span style="color:green">**Code Answer**: </span>
+```{r}
+auto.df.std <- data.frame(weight.std,year.std)
+write.csv(auto.df.std, '/Users/ahendel1/Documents/Academics/data-mining/auto_df_std.csv', row.names = F)
+```
+
+***  
+
+#####################################
+#### Question 5: **<span style="color:Crimson">(3 points)</span>**
+#####################################
+Set R's seed to 1 (for Homework 1) and use **sample()** to divide the data into:
+
+* a training set of 256 observations (automobiles), and  
+* a validation set of 136 observations.  
+
+In addition, create two new variables, **weight.train.std** and **year.train.std**, containing standardized values of the weight and year for the training data.  Use the same means and standard deviations (from the training data) to standardize the validation data, creating two more variables, **weight.valid.std** and **year.valid.std**.
+
+Enter your R code below.  
+<span style="color:green">**Code Answer**: </span>
+```{r}
+set.seed(1)
+train <- sample(nrow(auto.df.std), 256, replace=F)
+
+weight.train.std <- scale(Auto$weight[train])
+year.train.std   <- scale(Auto$year[train])
+
+train.x <- cbind(weight.train.std, year.train.std)
+train.y <- Auto$mpg[train]
+
+
+weight.valid.std <- (Auto$weight[-train] - mean(Auto$weight[train])) / sd(Auto$weight[train])
+year.valid.std <- (Auto$year[-train] - mean(Auto$year[train])) / sd(Auto$year[train])
+valid.x <- cbind(weight.valid.std, year.valid.std)
+valid.y <- Auto$mpg[-train]
+```
+
+
+#####################################
+#### Question 6: **<span style="color:Crimson">(3 points)</span>**
+#####################################
+Use 1-nearest neighbor regression (fit on the standardized training data) to predict the gas mileage of the cars in the validation set.  Compute the mean squared error.  
+
+Enter your R code below.  
+<span style="color:green">**Code Answer**: </span>
+```{r}
+library(FNN)
+predictions <- knn.reg(train.x, valid.x, train.y, k = 1)
+
+mse <- function(predicted, actual){
+  return(mean((predicted - actual)^2))
+}
+
+mse(predictions$pred, valid.y)
+
+```
+
+
+#####################################
+#### Question 7: **<span style="color:Crimson">(1 point)</span>**
+#####################################
+
+What is the MSE for the validation set?  (Round your answer to 2 decimal places.)
+
+Your Answer:  
+<span style="color:green">**Numeric Answer** </span>
+**<span style="color:red">(AUTOGRADED on D2L)</span>**:
+
+
+***  
+
+#####################################
+#### Question 8: **<span style="color:Crimson">(4 points)</span>**
+#####################################
+Use a for() loop to apply K-nearest neighbors regression to the same training and validation sets, for values of k from 1 to 20.  Make a plot of the MSE as a function of k.  
+
+Enter your R code (just the code, not the plot) below.  
+<span style="color:green">**Code Answer**: </span>
+```{r}
+K <- seq(1, 20, by = 1)
+results <- numeric(length(K))
+for(i in K){
+  predictions <- knn.reg(train.x, valid.x, train.y, k = i)
+  results[i] <- mse(predictions$pred, valid.y)
+}
+
+plot(K, results)
+```
+
+
+
+
+#####################################
+#### Question 9: **<span style="color:Crimson">(2 points)</span>**
+#####################################
+In your opinion, which value of k is the best choice?  Why?
+
+K = 13 has the lowest mean squared error, thus it is the best choice. K= 7 would also be a good choice.
+
+<span style="color:green">**Text Answer**: </span>
+
+
+
+
+
+***  
+***  
+
+##########################################################################
+## <span style="color:DarkViolet">Problem 2:  </span>
+##########################################################################
+
+<span style="color:DarkViolet">You are about to start **Problem 2 of 2**, which analyzes personal income using the Census_income.csv data file (available under D2L Lesson 1 resources).   You can find more information in Homework 1: Instructions on D2L.  </span>
+
+<span style="color:DarkViolet">Data Source:  Kohavi, R and B. Becker. (1996). [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml). Irvine, CA: University of California, School of Information and Computer Science.  </span>
+
+<span style="color:DarkViolet">Important:  It may be helpful to clear your workspace prior to starting this problem.  This will prevent confusion when referencing the **knn** function. </span>
+
+
+***  
+
+
+#####################################
+#### Question 10: **<span style="color:Crimson">(2 points)</span>**
+#####################################
+Create a new variable, Sex01, which equals 0 for males and 1 for females.  
+
+**<span style="color:Crimson">Caution**</span>:  For this data set, R reads in the values of Sex with an extra space in front of them: " Male" and " Female".  You will need to account for this when creating the variable Sex01.
+
+Enter your R code below.  
+<span style="color:green">**Code Answer**: </span>
+```{r}
+income <- read.csv('Census_income.csv')
+
+Sex01 <- ifelse(income$Sex == " Male", 0, 1)
+```
+
+
+#####################################
+#### Question 11: **<span style="color:Crimson">(4 points)</span>**
+#####################################
+Set R's seed to 1 again and randomly sample 20,000 individuals to be in the training set.
+
+Create two new variables, **Educ.train.std**, and **Age.train.std**, which contain standardized versions of the EducYears and Age variables for the training data.  Combine these variables, along with the training-set values of variable **Sex01**, into a matrix or data frame **train.X.std**.
+
+Use the same means and standard deviations (from the training data) to standardize the validation data, creating two more variables, **Educ.valid.std** and **Age.valid.std**. Combine these variables, along with the validation-set values of variable **Sex01**, into a matrix or data frame **valid.X.std**.
+
+[*Comment*: this allows us to standardize the numeric variables EducYears and Age, without standardizing the indicator variable Sex01.]
+
+Enter your R code below.  
+<span style="color:green">**Code Answer**: </span>
+```{r echo=FALSE, eval=FALSE}
+set.seed(1)
+train <- sample(nrow(income), size = 20000)
+
+Educ.train.std <- scale(income$EducYears[train])
+Age.train.std  <- scale(income$Age[train])
+train.X.std    <- cbind(Educ.train.std, Age.train.std, Sex01[train])
+
+Educ.valid.std <- (income$EducYears[-train] - mean(income$EducYears[train])) / sd(income$EducYears[train])
+Age.valid.std  <- (income$Age[-train] - mean(income$Age[train])) / sd(income$Age[train])
+valid.X.std    <- cbind(Educ.valid.std, Age.valid.std, Sex01[-train])
+
+```
+ 
+ 
+***  
+
+
+#####################################
+#### Question 12: **<span style="color:Crimson">(2 points)</span>**
+#####################################
+Use 25-nearest neighbor classification (fit on the training set) to predict whether the income of each individual in the validation set is >50K or <=50K. 
+
+Find the confusion matrix.  You should be able to produce a matrix table with two rows and two columns, similar to the one below.  Use the spaces below the table to indicate what appears in each part of your matrix that corresponds to the letters **[A]** through **[D]**. For example, if the matrix you create shows 5432 in the cell that corresponds to **[A]** in the matrix below, you would enter "5432" in the space next to "[A]".
+
+```{r echo=FALSE}
+library(class)
+set.seed(1)
+
+predictions <- knn(train.X.std, valid.X.std, income$Income[train], k=25)
+table(predictions, income$Income[-train])
+```
+
+Please enter the information *exactly as it appears in R*.
+
+.                 | Actual income <= 50K | Actual Income > 50K
+----------------- | -------------------- | -------------------
+Classified <= 50K	| **[A]** | **[B]** | 
+Classified > 50K	| **[C]** | **[D]** | 
+	
+
+<span style="color:green">**Numeric Answer** </span>
+**<span style="color:red">(AUTOGRADED on D2L)</span>**:  
+[A] =  8838
+[B] =  1808
+[C] =  691
+[D] =  1224
+
+ 
+
+#####################################
+#### Question 13: **<span style="color:Crimson">(1 point)</span>**
+#####################################
+What is the overall error rate on the validation set? Enter your answer as a decimal between 0 and 1, rounded to 3 decimal places.
+
+```{r echo=FALSE}
+(8838 + 1808) / (8838 + 1808 + 691 + 1224)
+```
+
+Your Answer:  
+<span style="color:green">**Numeric Answer** </span>
+**<span style="color:red">(AUTOGRADED on D2L)</span>**:
+
+
+#####################################
+#### Question 14: **<span style="color:Crimson">(1 point)</span>**
+#####################################
+What proportion of people making > $50,000 were misclassified? Enter your answer as a decimal between 0 and 1, rounded to 3 decimal places.
+
+```{r echo=FALSE}
+1808 / (1808 + 1224)
+```
+
+Your Answer:  
+<span style="color:green">**Numeric Answer** </span>
+**<span style="color:red">(AUTOGRADED on D2L)</span>**:
+
+ 
+*** 

@@ -1,0 +1,37 @@
+Age:  Age in years
+
+Sex:  1 = male, 0 = female
+
+ChestPain:  chest pain type 
+-- Value 1: typical angina 
+-- Value 2: atypical angina 
+-- Value 3: non-anginal pain 
+-- Value 4: asymptomatic 
+
+BloodPressure: resting blood pressure (in mm Hg on admission to the hospital)
+
+Chol: serum cholesterol in mg/dl. Has been discretized. 
+
+HighBloodSugar: (fasting blood sugar > 120 mg/dl) (1 = true; 0 = false) 
+
+ECG:  resting electrocardiographic results 
+-- Value 0: normal 
+-- Value 1: having ST-T wave abnormality (T wave inversions and/or ST elevation or depression of > 0.05 mV) 
+-- Value 2: showing probable or definite left ventricular hypertrophy by Estes' criteria 
+
+MaxHeartRate:  maximum heart rate achieved.  Has been discretized. 
+
+ExerAngina:  exercise induced angina (1 = yes; 0 = no) 
+
+STdepress.disc:  ST depression induced by exercise relative to rest. Has been discretized. 
+
+Slope: the slope of the peak exercise ST segment 
+-- Value 1: upsloping 
+-- Value 2: flat 
+-- Value 3: downsloping 
+
+Fluoroscopy:  number of major vessels (0-3) colored by fluoroscopy
+
+Thal: Results of a thallium heart scan.  3 = normal; 6 = cold spot which does not change, suggesting heart damage; 7 = cold spot which disappears while resting, suggesting a blocked artery
+
+hasHD:  Diagnosis of heart disease.  0 indicates no heart disease. 

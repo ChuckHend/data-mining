@@ -1,0 +1,434 @@
+---
+title: "Homework 5 R markdown"
+author: "Adam Hendel"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    fig_height: 4
+    fig_width: 4.5
+  pdf_document:
+    fig_height: 4
+    fig_width: 4.5
+  word_document:
+    fig_height: 4
+    fig_width: 4.5
+---
+
+
+```{r, setup, include=FALSE}
+require(mosaic)   # Load additional packages here 
+require(glmnet)
+# Some customization.  You can alter or delete as desired (if you know what you are doing).
+trellis.par.set(theme=theme.mosaic()) # change default color scheme for lattice
+knitr::opts_chunk$set(
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+```
+
+#### <span style="color:Blue">**Intellectual Property:**</span>  
+These problems are the intellectual property of the instructors and may not be reproduced outside of this course.
+
+#### <span style="color:Crimson">**Due Date:**</span>  
+Tuesday, October 10, 2017 at 11:59 PM 
+
+***  
+***  
+
+##########################################################################
+## Problem 1: Identifying Methods
+##########################################################################
+
+<span style="color:DarkViolet">Using the data in the Trees.csv file, fit the response Volume on the remaining variables, find coefficient estimates for the model  
+$Volume = \beta_0 + \beta_1 Girth + \beta_2 Height + \beta_3 GirthHeight + \beta_4 Girth2 +\beta_5 Girth2Height$  
+using each of the following methods:  
+1.  Multiple linear regression  
+2.  Ridge Regression ($\alpha$  = 0), with $\lambda$ = 0.01, 0.02, â¦, 0.99, 1.00.  
+3.  LASSO ($\alpha$ = 1), with $\lambda$ = 0.01, 0.02, â¦, 0.99, 1.00.  
+4.  Elastic net, with $\alpha$  = 0.7 and $\lambda$ = 0.01, 0.02, â¦, 0.99, 1.00. </span>
+
+#####################################
+### <span style="color:DarkViolet">Question 1</span> **<span style="color:Crimson">(1 point)</span>**:
+#####################################
+
+```{r}
+# question 1
+trees <- read.csv('../data/Trees.csv')
+
+x <- model.matrix(Volume ~ . - 1, data=trees)[, -1] # drop the intercept from the model matrix
+y <- trees$Volume
+lambdalist = c((1:100)/100)
+
+# Build Models
+# Multi Linear Regression
+LIN.mod <- lm(y ~ x)
+summary(lm(Volume ~ ., data=trees))
+# Ridge Regression  (α = 0)
+RR.mod <- glmnet(x, y, lambda=lambdalist, alpha=0)
+# LASSO
+LASSO.mod <- glmnet(x, y, lambda=lambdalist, alpha=1)
+# Elastic Net
+ENET.mod <- glmnet(x, y, lambda=lambdalist, alpha=0.7)
+
+# 4-9
+coef(LASSO.mod, s=0.1)
+
+```
+
+
+<span style="color:DarkViolet">Consider the fit of model 1., multiple linear regression. How many of the predictors are marginally significant (after fitting the other predictors)?</span>  
+
+<span style="color:green">**Multiple choice Answer** </span>
+  **<span style="color:red">(AUTOGRADED on D2L)</span>**:  one of  
+0,  
+1,  
+2,  
+3,  
+4
+
+#####################################
+### <span style="color:DarkViolet">Question 2</span> **<span style="color:Crimson">(2 points)</span>**:
+#####################################
+
+<span style="color:DarkViolet">Provide an explanation for the answer to the previous question. </span>
+
+
+<span style="color:green">**Text Answer**: </span>
+
+#####################################
+### <span style="color:DarkViolet">Question 3</span> **<span style="color:Crimson">( points)</span>**:
+#####################################
+
+<span style="color:DarkViolet">Which of the following methods could **NOT** have produced the below coefficients? Select all methods that apply.  
+$\hat{\beta}_0$ = â5.90695, $\hat{\beta}_1$ = 0, $\hat{\beta}_2$ = 0, $\hat{\beta}_3$ = 0.01194, $\hat{\beta}_4$ = 0.03991, $\hat{\beta}_5$ = 0.00115</span>  
+
+<span style="color:green">**Multiple SELECT Answer** </span>
+  **<span style="color:red">(AUTOGRADED on D2L)</span>**:  
+Multiple linear regression,  
+Ridge Regression,  
+Elastic net,  
+LASSO  
+
+***
+
+#####################################
+### <span style="color:DarkViolet">Question 4-9</span> **<span style="color:Crimson">(6 points, 1 each)</span>**:
+#####################################
+
+<span style="color:DarkViolet">Input the values for the coefficients of the LASSO model fit with $\lambda$ = 0.1. Please use the values  
+$\texttt{lambdalist = c((1:100)/100)}$  
+for fitting with the glmnet() function.</span>  
+
+<span style="color:DarkViolet">$\hat{\beta}_0$ =  
+$\hat{\beta}_1$ =   
+$\hat{\beta}_2$ =   
+$\hat{\beta}_3$ =   
+$\hat{\beta}_4$ =   
+$\hat{\beta}_5$ = </span>    
+
+<span style="color:green">**Numeric Answer**  </span> 
+**<span style="color:red">(AUTOGRADED on D2L)</span>**:  
+```{r,echo=FALSE}
+
+```
+
+***
+
+#####################################
+### <span style="color:DarkViolet">Question 10</span> **<span style="color:Crimson">(2 points)</span>**:
+#####################################
+
+<span style="color:DarkViolet">The image shows a plot of the $CV_{(5)}$ values for the Ridge Regression, LASSO, and Elastic net models, plotted against the value of $\lambda$.  Which model is optimal?</span>
+
+[See D2L Homework 5 for image, not able to include in code.]  
+
+<span style="color:green">**Multiple choice Answer** </span>
+  **<span style="color:red">(AUTOGRADED on D2L)</span>**:  one of  
+Elastic net,  
+Ridge Regression,  
+Multiple linear regression,  
+LASSO
+
+
+
+#####################################
+### <span style="color:DarkViolet">Question 11</span> **<span style="color:Crimson">(1 point)</span>**:
+#####################################
+
+<span style="color:DarkViolet">The model you chose in the previous question is optimal with $\lambda \approx$</span>  
+
+<span style="color:green">**Numeric Answer**  </span> 
+**<span style="color:red">(AUTOGRADED on D2L)</span>**:  
+
+
+
+
+***
+***
+
+##########################################################################
+## Problem 2:  Motivation for Penalized Regression
+##########################################################################
+
+<span style="color:DarkViolet">For the **College** data set from the **ISLR** package, we will work to predict *log.Enroll*, the natural log transformation of *Enroll*, the number of new students enrolled (per year) as a function of the other variables.  You may use the $\texttt{help(College)}$ command to learn more about the dataset. </span>
+
+
+***
+
+#####################################
+### <span style="color:DarkViolet">Question 12</span> **<span style="color:Crimson">(2 points)</span>**:
+#####################################
+
+<span style="color:DarkViolet">Each of the five variables *Enroll, Apps, Accept, F.Undergrad*, and *P.Undergrad* is related to the size of the college and has strongly right-skewed distribution.  Explain why the skewness makes sense, in terms of the variety of colleges covered in this dataset. </span>
+
+
+<span style="color:green">**Text Answer**: </span>
+
+
+#####################################
+### <span style="color:DarkViolet">Question 13</span> **<span style="color:Crimson">(2 points)</span>**:
+#####################################
+
+<span style="color:DarkViolet">To make linear relationships more reasonable, log transformation of these five variables work well. Define the new variables *log.Enroll, log.Apps, log.Accept, log.F.Undergrad*, and *log.P.Undergrad* as the (natural) log transformation of the corresponding variables.  Add these variables to the data frame.  Submit an appropriate plot for describing the distribution of the response, *log.Enroll*, to **Homework 5: Distribution of response** discussion. </span>
+
+<span style="color:green">**Graph Answer**  </span>: 
+  (post to discussion board on D2L)
+```{r,echo=FALSE}
+
+require('ISLR')
+# using College dataset
+skewed.vars <- c('Enroll','Apps','Accept','F.Undergrad','P.Undergrad')
+for(x in skewed.vars){
+  hist(College[,x], main=x)
+}
+
+# perform log transforms on the skewed vars
+College$log.Enroll <- log(College$Enroll)
+College$log.Apps   <- log(College$Apps)
+College$log.Accept<- log(College$Accept)
+College$log.F.Undergrad<- log(College$F.Undergrad)
+College$log.P.Undergrad<- log(College$P.Undergrad)
+
+College[,skewed.vars] <- NULL
+
+jpeg('L5_13_distrib-response.jpg')
+hist(College$log.Enroll)
+dev.off()
+
+```
+
+
+#####################################
+### <span style="color:DarkViolet">Question 14</span> **<span style="color:Crimson">(1 point)</span>**:
+#####################################
+
+<span style="color:DarkViolet">Which of the following predictors is most highly correlated with the response *log.Enroll*</span>?
+
+<span style="color:green">**Multiple choice Answer** </span>
+  **<span style="color:red">(AUTOGRADED on D2L)</span>**:  one of  
+Expend,  
+log.Accept,  
+log.P.Undergrad,  
+perc.alumni,  
+Personal
+
+```{r}
+cors <- c('Expend','log.Accept','log.P.Undergrad','perc.alumni','Personal')
+cors <- with(College, cor(log.Enroll, College[, cors]))
+
+```
+
+
+#####################################
+### <span style="color:DarkViolet">Question 15</span> **<span style="color:Crimson">(2 points)</span>**:
+#####################################
+
+<span style="color:DarkViolet">Provide a reason that the predictor you chose in the previous question makes sense, based on the description of the data. </span>
+
+<span style="color:green">**Text Answer**: </span>
+
+
+
+#####################################
+### <span style="color:DarkViolet">Question 16</span> **<span style="color:Crimson">(3 points)</span>**:
+#####################################
+
+<span style="color:DarkViolet">Describe features of this data set that support using a penalized regression model (versus a basic multiple linear regression model). </span>
+
+<span style="color:green">**Text Answer**: </span>
+
+
+***
+***
+
+##########################################################################
+## Problem 3:  Applying Methods
+##########################################################################
+
+<span style="color:DarkViolet">Using the data **College** data set from the **ISLR** package, with the new variables as defined in Problem 2, fit the response *log.Enroll* on the remaining variables:  *Private, Top10perc, Top25perc, Outstate, Room.Board, Books, Personal, PhD, Terminal, S.F.Ratio, perc.alumni, Expend, Grad.Rate, log.Apps, log.Accept, log.F.Undergrad, log.P.Undergrad*.  </span>
+
+***
+
+<span style="color:DarkViolet">For the following questions 17-20,  fit the LASSO ($\alpha$ = 1) model and find coefficients for $\lambda$ = 0.001, 0.002, â¦, 0.999, 1.000.  Determine how many coefficients are non-zero, **excluding the intercept**.</span>
+
+```{r echo=FALSE, eval=FALSE}
+testvars <- c('Private', 'Top10perc', 'Top25perc', 'Outstate', 'Room.Board', 'Books', 'Personal', 'PhD', 'Terminal', 'S.F.Ratio', 'perc.alumni', 'Expend', 'Grad.Rate', 'log.Apps', 'log.Accept', 'log.F.Undergrad', 'log.P.Undergrad')
+length(names(College))-1 == length(testvars)
+names(College)[!names(College) %in% testvars]
+
+library(glmnet)  # may need to download package glmnet
+
+# define model matrix
+x <- model.matrix(log.Enroll ~ .,data=College)[,-1]
+y <- College$log.Enroll
+n = dim(x)[1]
+p = dim(x)[2]
+
+lambdalist <- 1:1000/1000
+LASSOfit <- glmnet(x, y, alpha = 1,lambda=lambdalist)
+
+coef(LASSOfit,s=0.02)
+coef(LASSOfit,s=0.03)
+coef(LASSOfit,s=0.05)
+coef(LASSOfit,s=0.8)
+```
+
+#####################################
+#### <span style="color:DarkViolet">Question 17-20</span> **<span style="color:Crimson">(4 points, 1 each)</span>**:
+#####################################
+
+17.  For the LASSO model with $\lambda$ = 0.02, how many coefficients are non-zero?  
+<span style="color:green">**Multiple choice Answer** </span>
+  **<span style="color:red">(AUTOGRADED on D2L)</span>**:  one of  
+1,  
+2,  
+3,  
+4,  
+5
+
+18.  For the LASSO model with $\lambda$ = 0.03, how many coefficients are non-zero?  
+<span style="color:green">**Multiple choice Answer** </span>
+  **<span style="color:red">(AUTOGRADED on D2L)</span>**:  one of  
+1,  
+2,  
+3,  
+4,  
+5
+
+19.  For the LASSO model with $\lambda$ = 0.05, how many coefficients are non-zero?  
+<span style="color:green">**Multiple choice Answer** </span>
+  **<span style="color:red">(AUTOGRADED on D2L)</span>**:  one of  
+1,  
+2,  
+3,  
+4,  
+5
+
+20.  For the LASSO model with $\lambda$ = 0.8, how many coefficients are non-zero?  
+<span style="color:green">**Multiple choice Answer** </span>
+  **<span style="color:red">(AUTOGRADED on D2L)</span>**:  one of  
+1,  
+2,  
+3,  
+4,  
+5
+
+
+
+#####################################
+#### <span style="color:DarkViolet">Question 21</span> **<span style="color:Crimson">(4 points)</span>**:
+#####################################
+<span style="color:DarkViolet">Which variable(s) appear to be the most useful for predicting *log.Enroll* with the LASSO model? Select all that apply.</span>
+
+<span style="color:green">**Multiple SELECT Answer** </span>
+  **<span style="color:red">(AUTOGRADED on D2L)</span>**:  
+Private,  
+Top10perc,  
+Top25perc,  
+Outstate,  
+Room.Board,  
+Books,  
+Personal,  
+PhD,  
+Terminal,  
+S.F.Ratio,  
+perc.alumni,  
+Expend,  
+Grad.Rate,  
+log.Apps,  
+log.Accept,  
+log.F.Undergrad,  
+log.P.Undergrad
+
+***
+
+<span style="color:DarkViolet">For the following questions, use the Elastic net model, with$\alpha$ = 0.75 and $\lambda$  = 0.001, 0.002, â¦, 0.999, 1.000.</span>
+
+
+
+#####################################
+### <span style="color:DarkViolet">Question 22</span> **<span style="color:Crimson">(3 points)</span>**:
+#####################################
+
+
+<span style="color:DarkViolet">Using set.seed(5), make groups for 10-fold cross-validation:  
+$\texttt{groups = c(rep(1:10,77),(1:7))}$  
+$\texttt{set.seed(5)  }$  
+$\texttt{cvgroups = sample(groups,777)}$  
+Use the $\texttt{cv.glmnet}$ command along with these cross-validation groups to perform crossvalidation,
+with $CV_{(10)}$ contained in the value cvm of the output. For the Elastic net model
+with $\alpha$ = 0.75, make a plot of $CV_{(10)}$ vs $\lambda$ and submit your plot to **Homework 5: Elastic net model plot**.
+</span>
+
+<span style="color:green">**Graph Answer**</span>: 
+  (post to discussion board on D2L)
+```{r,echo=FALSE}
+
+# assign vars for repeatable CV
+n = nrow(College)
+ncv = 10
+groups = c(rep(1:10,77),(1:7))
+set.seed(5)
+cvgroups = sample(groups,777)
+
+# prepare data for use in CV
+lambdalist = 1:1000/1000
+x <- model.matrix(log.Enroll ~ ., data=College)[,-1]
+y <- College$log.Enroll
+
+# conduct the CV
+cv_enet <- cv.glmnet(x,y,lambda=lambdalist,alpha=0.75,nfolds=ncv,foldid=cvgroups)
+
+# get index of the lowest lambda from cv
+whichlowestcvLASSO <- order(cv_enet$cvm)[1]; min(cv_enet$cvm)
+# compute and return the value for lowset lambda
+bestlambdaLASSO <- cv_enet$lambda[order(cv_enet$cvm)[1]]; bestlambdaLASSO
+
+plot(cv_enet$lambda,cv_enet$cvm,type='l',lwd=1,xlab='lambda',ylab='CV(10)',main='ENET')
+
+jpeg('L5_22_enet.jpg')
+plot(cv_enet$lambda,cv_enet$cvm,type='l',lwd=1,xlab='lambda',ylab='CV(10)',main='ENET')
+dev.off()
+
+```
+
+#####################################
+### <span style="color:DarkViolet">Question 23</span> **<span style="color:Crimson">(2 points)</span>**:
+#####################################
+
+<span style="color:DarkViolet">For the Elastic net model with $\alpha$ = 0.75, what is the value of $\lambda$ that minimizes $CV_{(10)}$?</span>
+
+<span style="color:green">**Numeric Answer**  </span> 
+**<span style="color:red">(AUTOGRADED on D2L)</span>**:  
+```{r,echo=FALSE}
+```
+
+
+#####################################
+### <span style="color:DarkViolet">Question 24</span> **<span style="color:Crimson">(3 points)</span>**:
+#####################################
+
+<span style="color:DarkViolet">Enter your R code below for computing the $CV_{(10)}$ measure for the Elastic net model with $\alpha$ = 0.75. </span>
+
+<span style="color:green">**Code Answer**: </span>
+```{r, echo=TRUE}
+```

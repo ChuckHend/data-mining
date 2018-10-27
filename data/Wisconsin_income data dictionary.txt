@@ -1,0 +1,105 @@
+2014 ACS PUMS DATA DICTIONARY
+October 27, 2015
+# Simplified by Abra Brisbin to focus on variables of interest for data mining.
+
+AGEP 2
+Age
+00  .Under 1 year
+01..99 .1 to 99 years (Top-coded***)
+
+CIT 1
+Citizenship status
+1 .Born in the U.S.
+2 .Born in Puerto Rico, Guam, the U.S. Virgin Islands, or the Northern Marianas
+3 .Born abroad of American parent(s)
+4 .U.S. citizen by naturalization
+5 .Not a citizen of the U.S.
+
+
+
+COW 1
+Class of worker
+b .N/A (less than 16 years old/NILF who last worked more than 5 years ago or never worked)
+1 .Employee of a private for-profit company or business, or of an individual, for wages, salary, or commissions
+2 .Employee of a private not-for-profit, tax-exempt, or charitable organization
+3 .Local government employee (city, county, etc.)
+4 .State government employee
+5 .Federal government employee
+6 .Self-employed in own not incorporated business, professional practice, or farm
+7 .Self-employed in own incorporated business, professional practice or farm
+8 .Working without pay in family business or farm
+
+
+JWMNP 3
+Travel time to work
+1 : 1 minute to get to work, or worked at home
+002..200 : 1 to 200 minutes to get to work (Top-coded)
+   
+LANX 1
+Language other than English spoken at home
+b .N/A (less than 5 years old)
+1 .Yes, speaks another language
+2 .No, speaks only English
+
+MAR 1
+Marital status
+1 .Married
+2 .Widowed
+3 .Divorced
+4 .Separated
+5 .Never married or under 15 years old
+
+
+
+SEX 1
+Sex
+1 .Male
+2 .Female
+
+WKHP 2
+Usual hours worked per week past 12 months
+bb  .N/A (less than 16 years old/did not work 
+ .during the past 12 months)
+01..98 .1 to 98 usual hours
+99  .99 or more usual hours
+
+DIS 1
+Disability recode
+1 .With a disability
+2 .Without a disability
+
+PERNP 7
+Total person's earnings
+bbbbbbb .N/A (less than 15 years old)
+0000000 .No earnings
+-010000 .Loss of $10000 or more (Rounded & bottom-coded components) 
+-000001..-009999 .Loss $1 to $9999 (Rounded components)
+0000001 .$1 or break even
+0000002..9999999 .$2 to $9999999 (Rounded & top-coded components)
+
+Note: Measured in 2013 dollars.
+
+RAC 1
+Recoded detailed race code
+1 .White alone
+2 .Black or African American alone
+3 .American Indian and/or Alaska Native
+6 .Asian alone
+8 .Some Other Race alone
+9 .Two or More Races
+
+Hispanic
+0 .Does not identify as Hispanic/Latinx
+1 .Identifies as Hispanic/Latinx
+
+Stem
+Yes Degree in a science or engineering-related field
+No Has a bachelor's degree, but it is not in a science or engineering-related field
+NoDeg Does not have a bachelor's degree
+
+
+Education
+Years of education, not counting kindergarten.
+
+Region
+Region of Wisconsin
